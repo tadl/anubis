@@ -67,6 +67,13 @@ func TestBasePrefixInLinks(t *testing.T) {
 
 			output := buf.String()
 
+			// Branding must load from the challenge's own exempt asset namespace,
+			// including deployments mounted below a URL prefix.
+			logo := tt.basePrefix + "/.within.website/x/cmd/anubis/static/img/tadl-logo.svg?cacheBuster="
+			if !strings.Contains(output, `src="`+logo) {
+				t.Errorf("brand logo does not respect base prefix %q", tt.basePrefix)
+			}
+
 			// Check that honeypot link includes the base prefix
 			if !strings.Contains(output, `href="`+tt.wantInLink+`honeypot/`) {
 				t.Errorf("honeypot link does not contain base prefix %q\noutput: %s", tt.wantInLink, output)

@@ -1,0 +1,90 @@
+name: TADL release build
+
+on:
+  push:
+    branches: ["tadl/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      GOTOOLCHAIN: local
+      SKIP_INTEGRATION: "1"
+      TADL_VERSION: v1.28.2-tadl.1
+      DEB_VERSION: 1.28.2+tadl1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.15.0"
+          cache: npm
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        with:
+          toolchain: "1.99.1"
+          target: wasm32-unknown-unknown
+          cache: false
+      - uses: bytecodealliance/actions/wasmtime/setup@9152e710e9f7182e4c29ad218e4f335a7b203613 # v1.1.3
+      - name: Install compression tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends brotli zstd
+      - name: Build upstream assets and run unit tests
+        run: |
+          npm ci
+          npm run assets
+          git diff --exit-code -- web/index_templ.go
+          go test ./...
+      - name: Build Linux binary
+        env:
+          CGO_ENABLED: "0"
+          GOOS: linux
+          GOARCH: amd64
+        run: |
+          mkdir -p var/tadl
+          go build -trimpath -ldflags "-s -w -X github.com/TecharoHQ/anubis.Version=$TADL_VERSION" -o var/tadl/anubis ./cmd/anubis
+      - name: Package with upstream service and assets
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, re, subprocess, urllib.request
+          from pathlib import Path
+          root = Path('var/tadl')
+          source = root / 'upstream.deb'
+          url = 'https://github.com/TecharoHQ/anubis/releases/download/v1.28.2/anubis_1.28.2_amd64.deb'
+          with urllib.request.urlopen(url, timeout=60) as response:
+              source.write_bytes(response.read(30000000))
+          expected = 'fbcd0f3ec8cad426eacc1873b0073285d824dafb4163fcfe3e1261f7d8190701'
+          assert hashlib.sha256(source.read_bytes()).hexdigest() == expected
+          package = root / 'package'
+          subprocess.run(['dpkg-deb', '--raw-extract', str(source), str(package)], check=True)
+          binary = package / 'usr/bin/anubis'
+          binary.write_bytes((root / 'anubis').read_bytes())
+          binary.chmod(0o755)
+          control = package / 'DEBIAN/control'
+          text = re.sub(r'^Version: .*$', 'Version: ' + os.environ['DEB_VERSION'], control.read_text(), flags=re.M)
+          control.write_text(text)
+          if (package / 'DEBIAN/md5sums').exists():
+              entries = [p for p in package.rglob('*') if p.is_file() and 'DEBIAN' not in p.relative_to(package).parts]
+              (package / 'DEBIAN/md5sums').write_text(''.join(hashlib.md5(p.read_bytes()).hexdigest() + '  ' + str(p.relative_to(package)) + '\n' for p in sorted(entries)))
+          out = root / 'out'
+          out.mkdir()
+          dest = out / ('anubis_' + os.environ['DEB_VERSION'] + '_amd64.deb')
+          subprocess.run(['dpkg-deb', '-Zgzip', '-z6', '--build', '--root-owner-group', str(package), str(dest)], check=True)
+          metadata = {'source_commit': os.environ['GITHUB_SHA'], 'upstream_tag': 'v1.28.2', 'version': os.environ['TADL_VERSION'], 'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest()}
+          (out / 'build.json').write_text(json.dumps(metadata, indent=2) + '\n')
+          (out / 'SHA256SUMS').write_text(hashlib.sha256(dest.read_bytes()).hexdigest() + '  ' + dest.name + '\n')
+          PY
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: anubis-1.28.2-tadl1-linux-amd64
+          path: var/tadl/out/*
+          retention-days: 30

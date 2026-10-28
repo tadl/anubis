@@ -1,0 +1,210 @@
+/* TADL Local History branding. Challenge scripts and DOM hooks stay upstream. */
+html.tadl-document {
+  display: block;
+  height: auto;
+  min-height: 100%;
+  background: #f4f6f9;
+}
+
+body.tadl-page {
+  --body-sans-font: "Open Sans", Arial, sans-serif;
+  --body-title-font: "Open Sans", Arial, sans-serif;
+  --background: #f4f6f9;
+  --text: #333;
+  --text-selection: #dce9cc;
+  --preformatted-background: #eef2f6;
+  --link-foreground: #0b2f57;
+  --link-background: transparent;
+  --progress-bar-outline: 2px solid #4b810b;
+  --progress-bar-fill: #4b810b;
+  display: block;
+  box-sizing: border-box;
+  min-height: 100vh;
+  height: auto;
+  margin: 0;
+  font: 18px/1.6 var(--body-sans-font);
+}
+
+.tadl-page *,
+.tadl-page *::before,
+.tadl-page *::after {
+  box-sizing: border-box;
+}
+
+.tadl-header {
+  padding: 28px max(24px, calc((100% - 1080px) / 2));
+  border-bottom: 7px solid #4b810b;
+  background: linear-gradient(135deg, #0b2f57, #345779);
+}
+
+.tadl-page .tadl-brand {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  max-width: 100%;
+  color: #fff;
+  text-decoration: none;
+}
+
+.tadl-brand img {
+  display: block;
+  width: 300px;
+  max-width: 100%;
+  height: auto;
+}
+
+.tadl-brand span {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.tadl-page .tadl-check-shell {
+  width: 100%;
+  max-width: 928px;
+  margin: 48px auto;
+  padding: 0 24px;
+}
+
+.tadl-check-card {
+  padding: clamp(24px, 5vw, 48px);
+  border: 1px solid #d7dfe7;
+  border-top: 5px solid #4b810b;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #fff 65%, #f2f6fa);
+  box-shadow: 0 14px 32px rgb(13 49 83 / 8%);
+}
+
+.tadl-check-label {
+  margin: 0 0 12px;
+  color: #4a652b;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tadl-check-card h1 {
+  margin: 0 0 20px;
+  color: #0b2f57;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.tadl-check-intro {
+  margin: 0 0 16px;
+  color: #0b2f57;
+  font-size: 21px;
+  line-height: 1.5;
+}
+
+.tadl-check-description {
+  max-width: 680px;
+  margin: 0 0 28px;
+}
+
+.tadl-check-card .centered-div {
+  text-align: left;
+}
+
+/* Keep the upstream image nodes available to its scripts; the header supplies
+   our visible branding instead of the mascot artwork. */
+.tadl-check-card .centered-div > img {
+  display: none;
+}
+
+.tadl-check-card #status {
+  padding: 12px 16px;
+  border-left: 4px solid #4b810b;
+  background: #edf4e7;
+  color: #294b0d;
+}
+
+.tadl-check-card #progress {
+  width: min(30rem, 100%);
+  height: 16px;
+  margin: 24px 0;
+  border-radius: 3px;
+  outline-offset: 2px;
+}
+
+.tadl-check-card details {
+  margin-top: 28px;
+  font-size: 16px;
+}
+
+.tadl-check-card summary {
+  width: fit-content;
+  cursor: pointer;
+  color: #0b2f57;
+  font-weight: 600;
+}
+
+.tadl-check-help {
+  margin: 28px 0 0;
+  padding-top: 24px;
+  border-top: 1px solid #d7dfe7;
+  color: #555;
+  font-size: 16px;
+}
+
+.tadl-page a {
+  text-underline-offset: 3px;
+}
+
+.tadl-page a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.tadl-page a:focus-visible,
+.tadl-page summary:focus-visible {
+  outline: 3px solid #49688e;
+  outline-offset: 5px;
+}
+
+.tadl-check-footer {
+  padding: 24px 8px 0;
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+}
+
+.tadl-check-footer p {
+  margin: 6px 0;
+}
+
+.tadl-page pre {
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .tadl-header {
+    padding: 22px 24px;
+    text-align: center;
+  }
+
+  .tadl-brand img {
+    width: 250px;
+  }
+
+  .tadl-brand span {
+    font-size: 12px;
+  }
+
+  .tadl-page .tadl-check-shell {
+    margin: 24px auto;
+    padding: 0 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tadl-page .bar-inner {
+    transition: none;
+  }
+}
