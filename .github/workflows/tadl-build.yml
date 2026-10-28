@@ -51,7 +51,8 @@ jobs:
           GOARCH: amd64
         run: |
           mkdir -p var/tadl
-          go build -trimpath -ldflags "-s -w -X github.com/TecharoHQ/anubis.Version=$TADL_VERSION" -o var/tadl/anubis ./cmd/anubis
+          go build -buildvcs=false -trimpath -ldflags "-s -w -X github.com/TecharoHQ/anubis.Version=$TADL_VERSION" -o var/tadl/anubis ./cmd/anubis
+          test "$(var/tadl/anubis --version)" = "Anubis $TADL_VERSION"
       - name: Package with upstream service and assets
         run: |
           python3 - <<'PY'
