@@ -102,7 +102,9 @@ jobs:
           gh release create "$RELEASE_TAG" --target "$SOURCE_SHA" --draft \
             --title "TADL Anubis $RELEASE_TAG" --notes-file release-notes.md
           gh release upload "$RELEASE_TAG" bundle/*.deb bundle/SHA256SUMS bundle/build.json
-          gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" > release.json
+          release_id="$(gh release view "$RELEASE_TAG" --json databaseId --jq '.databaseId')"
+          [[ "$release_id" =~ ^[1-9][0-9]*$ ]]
+          gh api "repos/$GH_REPO/releases/$release_id" > release.json
           python3 - <<'PY'
           import hashlib, json
           from pathlib import Path
