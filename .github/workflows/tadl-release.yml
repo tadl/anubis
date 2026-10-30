@@ -86,8 +86,7 @@ jobs:
               'TADL-branded Anubis based on upstream ' + metadata['upstream_tag'] + '.\n\n'
               'Source commit: `' + metadata['source_commit'] + '`\n\n'
               'Promoted without rebuilding from [successful build ' + str(run['id']) + '](' + run['html_url'] + ').\n\n'
-              'Assets: Linux amd64 Debian package, SHA256SUMS, and build.json.\n'
-              'Publishing this release does not install or deploy it.\n')
+              'Assets: Linux amd64 Debian package, SHA256SUMS, and build.json.\n')
           PY
 
       - name: Publish without replacing existing releases
